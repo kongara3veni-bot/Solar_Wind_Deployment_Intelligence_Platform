@@ -9,8 +9,10 @@ function Register() {
     name: "",
     email: "",
     password: "",
-    role: "User",
+    role: "user",
   });
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setUser({
@@ -22,15 +24,31 @@ function Register() {
   const registerUser = async (e) => {
     e.preventDefault();
 
-    try {
-      await API.post("/auth/auth/register", user);
+    setLoading(true);
 
-      alert("Registration Successful!");
+    try {
+      const response = await API.post("/auth/auth/register", user);
+
+      alert(response.data.message);
+
+      setUser({
+        name: "",
+        email: "",
+        password: "",
+        role: "user",
+      });
 
       navigate("/login");
-    } catch (err) {
-      console.log(err);
-      alert("Registration Failed!");
+    } catch (error) {
+      console.error(error);
+
+      if (error.response) {
+        alert(error.response.data.detail || "Registration Failed!");
+      } else {
+        alert("Unable to connect to the server.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,11 +88,11 @@ function Register() {
 
             <input
               type="text"
-              name="name"
               className="form-control"
-              placeholder="Enter your full name"
+              name="name"
               value={user.name}
               onChange={handleChange}
+              placeholder="Enter your full name"
               required
             />
           </div>
@@ -86,11 +104,11 @@ function Register() {
 
             <input
               type="email"
-              name="email"
               className="form-control"
-              placeholder="Enter your email"
+              name="email"
               value={user.email}
               onChange={handleChange}
+              placeholder="Enter your email"
               required
             />
           </div>
@@ -102,11 +120,11 @@ function Register() {
 
             <input
               type="password"
-              name="password"
               className="form-control"
-              placeholder="Enter your password"
+              name="password"
               value={user.password}
               onChange={handleChange}
+              placeholder="Enter your password"
               required
             />
           </div>
@@ -122,8 +140,8 @@ function Register() {
               value={user.role}
               onChange={handleChange}
             >
-              <option>User</option>
-              <option>Admin</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
 
@@ -131,8 +149,9 @@ function Register() {
             <button
               type="submit"
               className="btn btn-success btn-lg"
+              disabled={loading}
             >
-              Register
+              {loading ? "Registering..." : "Register"}
             </button>
           </div>
 
@@ -141,9 +160,7 @@ function Register() {
         <hr />
 
         <div className="text-center">
-          <p>
-            Already have an account?
-          </p>
+          <p>Already have an account?</p>
 
           <Link
             to="/login"

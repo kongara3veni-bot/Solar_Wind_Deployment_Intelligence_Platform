@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+
 import { getAnalytics } from "../api/api";
 
 ChartJS.register(
@@ -27,6 +28,8 @@ function AnalyticsCharts() {
     wind_predictions: 0,
   });
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetchAnalytics();
   }, []);
@@ -36,9 +39,20 @@ function AnalyticsCharts() {
       const res = await getAnalytics();
       setAnalytics(res.data);
     } catch (error) {
-      console.log("Analytics Error:", error);
+      console.error("Analytics API Error:", error);
+      alert("Unable to load analytics data.");
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="text-center mt-5">
+        <h4>Loading Analytics...</h4>
+      </div>
+    );
+  }
 
   const barData = {
     labels: ["Solar", "Wind"],
@@ -73,10 +87,13 @@ function AnalyticsCharts() {
     ],
   };
 
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+  };
+
   return (
     <div>
-
-      {/* Summary Cards */}
 
       <div className="row mb-4">
 
@@ -109,8 +126,6 @@ function AnalyticsCharts() {
 
       </div>
 
-      {/* Charts */}
-
       <div className="row">
 
         <div className="col-md-6 mb-4">
@@ -121,8 +136,11 @@ function AnalyticsCharts() {
               <h5>Solar vs Wind Predictions</h5>
             </div>
 
-            <div className="card-body">
-              <Bar data={barData} />
+            <div
+              className="card-body"
+              style={{ height: "350px" }}
+            >
+              <Bar data={barData} options={options} />
             </div>
 
           </div>
@@ -137,8 +155,11 @@ function AnalyticsCharts() {
               <h5>Prediction Distribution</h5>
             </div>
 
-            <div className="card-body">
-              <Pie data={pieData} />
+            <div
+              className="card-body"
+              style={{ height: "350px" }}
+            >
+              <Pie data={pieData} options={options} />
             </div>
 
           </div>

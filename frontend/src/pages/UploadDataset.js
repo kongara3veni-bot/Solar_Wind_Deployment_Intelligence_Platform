@@ -1,9 +1,10 @@
 import { useState } from "react";
-import API from "../api/api";
+import { uploadDataset } from "../api/api";
 
 function UploadDataset() {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -21,31 +22,33 @@ function UploadDataset() {
     const formData = new FormData();
     formData.append("file", file);
 
+    setLoading(true);
+
     try {
-      const res = await API.post(
-        "/datasets/dataset/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+      const res = await uploadDataset(formData);
+
+      setMessage(
+        `✅ Dataset Uploaded Successfully!\n\nFilename: ${res.data.filename}`
       );
 
-      setMessage("✅ Dataset Uploaded Successfully!");
       console.log(res.data);
+
+      setFile(null);
+
+      e.target.reset();
+
     } catch (error) {
-      console.log(error);
-      setMessage("❌ Upload Failed!");
+      console.error(error);
+      setMessage("❌ Dataset Upload Failed!");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container mt-5">
 
-      {/* Header */}
       <div className="text-center mb-5">
-
         <h1 className="fw-bold text-success">
           📂 Upload Climate Dataset
         </h1>
@@ -53,12 +56,10 @@ function UploadDataset() {
         <p className="lead text-muted">
           Upload your climate dataset and allow the AI model to analyze renewable energy potential.
         </p>
-
       </div>
 
       <div className="row">
 
-        {/* Upload Section */}
         <div className="col-lg-7">
 
           <div className="card shadow-lg border-0">
@@ -98,21 +99,18 @@ function UploadDataset() {
 
                 {file && (
                   <div className="alert alert-info">
-
                     <strong>Selected File:</strong>
-
                     <br />
-
                     {file.name}
-
                   </div>
                 )}
 
                 <button
                   className="btn btn-success btn-lg w-100"
                   type="submit"
+                  disabled={loading}
                 >
-                  Upload Dataset
+                  {loading ? "Uploading..." : "Upload Dataset"}
                 </button>
 
               </form>
@@ -129,7 +127,6 @@ function UploadDataset() {
 
         </div>
 
-        {/* Right Side */}
         <div className="col-lg-5">
 
           <div className="card shadow-lg mb-4">
@@ -141,27 +138,11 @@ function UploadDataset() {
             <div className="card-body">
 
               <ul className="list-group">
-
-                <li className="list-group-item">
-                  🌡 Temperature
-                </li>
-
-                <li className="list-group-item">
-                  💨 Wind Speed
-                </li>
-
-                <li className="list-group-item">
-                  💧 Humidity
-                </li>
-
-                <li className="list-group-item">
-                  🌧 Rainfall
-                </li>
-
-                <li className="list-group-item">
-                  ⚡ Energy Label
-                </li>
-
+                <li className="list-group-item">🌡 Temperature</li>
+                <li className="list-group-item">💨 Wind Speed</li>
+                <li className="list-group-item">💧 Humidity</li>
+                <li className="list-group-item">🌧 Rainfall</li>
+                <li className="list-group-item">⚡ Energy Label</li>
               </ul>
 
             </div>
@@ -177,76 +158,12 @@ function UploadDataset() {
             <div className="card-body">
 
               <ul>
-
                 <li>Upload only CSV files.</li>
-
                 <li>Dataset must contain climate attributes.</li>
-
                 <li>Maximum file size: 10 MB.</li>
-
                 <li>Ensure column names are correct.</li>
-
                 <li>Use UTF-8 encoded CSV files.</li>
-
               </ul>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Information Section */}
-
-      <div className="card shadow-lg mt-5">
-
-        <div className="card-header bg-warning">
-          <h4>🤖 AI Processing Workflow</h4>
-        </div>
-
-        <div className="card-body">
-
-          <div className="row text-center">
-
-            <div className="col-md-3">
-
-              <h1>📂</h1>
-
-              <h5>Upload</h5>
-
-              <p>Select Climate Dataset</p>
-
-            </div>
-
-            <div className="col-md-3">
-
-              <h1>🧹</h1>
-
-              <h5>Preprocessing</h5>
-
-              <p>Clean and Validate Data</p>
-
-            </div>
-
-            <div className="col-md-3">
-
-              <h1>🤖</h1>
-
-              <h5>AI Analysis</h5>
-
-              <p>Random Forest Model</p>
-
-            </div>
-
-            <div className="col-md-3">
-
-              <h1>⚡</h1>
-
-              <h5>Prediction</h5>
-
-              <p>Solar or Wind Energy</p>
 
             </div>
 

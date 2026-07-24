@@ -1,66 +1,72 @@
 import axios from "axios";
 
-// Create Axios Instance
 const API = axios.create({
-  baseURL: "http://127.0.0.1:8000",
+    baseURL: "http://127.0.0.1:8000"
 });
 
-// ==========================
-// Authentication APIs
-// ==========================
+// Authentication
 
-// Register User
-export const registerUser = (userData) => {
-  return API.post("/auth/register", userData);
+export const loginUser = async (data) => {
+    const response = await API.post("/auth/login", data);
+    return response.data;
 };
 
-// Login User
-export const loginUser = (loginData) => {
-  return API.post("/auth/login", loginData);
+export const registerUser = async (data) => {
+    const response = await API.post("/auth/register", data);
+    return response.data;
 };
 
-// ==========================
-// Dashboard API
-// ==========================
+// Projects
 
-export const getDashboard = () => {
-  return API.get("/dashboard/");
+export const getProjects = async () => {
+    const response = await API.get("/projects");
+    return response.data;
 };
 
-// ==========================
-// Analytics API
-// ==========================
-
-export const getAnalytics = () => {
-  return API.get("/analytics/");
+export const addProject = async (data) => {
+    const response = await API.post("/projects", data);
+    return response.data;
 };
 
-// ==========================
-// Prediction APIs
-// ==========================
+// Dataset
 
-export const predictEnergy = (params) => {
-  return API.get("/prediction/", {
-    params,
-  });
+export const uploadDataset = async (data) => {
+    const response = await API.post("/datasets/upload", data);
+    return response.data;
 };
 
-// Prediction History
-export const getPredictionHistory = () => {
-  return API.get("/prediction/history");
+export const readDataset = async () => {
+    const response = await API.get("/datasets");
+    return response.data;
 };
 
-// ==========================
-// Dataset Upload API
-// ==========================
+// Prediction
 
-export const uploadDataset = (formData) => {
-  return API.post("/dataset/upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+export const predictEnergy = async (data) => {
+    const response = await API.get("/prediction/predict", {
+        params: data,
+    });
+
+    return response.data;
 };
 
-// Export Axios Instance
+export const getPredictionHistory = async () => {
+    const response = await API.get("/prediction/history");
+    return response.data;
+};
+
+// Dashboard
+
+export const getDashboard = async () => {
+    const response = await API.get("/dashboard");
+    return response.data;
+};
+
+// Analytics
+
+export const getAnalytics = async () => {
+    const response = await API.get("/analytics");
+    return response.data;
+};
+
 export default API;
