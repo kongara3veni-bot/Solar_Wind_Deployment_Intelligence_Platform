@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../api/api";
+import { loginUser } from "../api/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -17,19 +17,26 @@ function Login() {
     });
   };
 
-  const loginUser = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await API.post("/auth/auth/login", user);
+      const res = await loginUser(user);
 
-      alert("Login Successful!");
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          email: res.email,
+          role: "User",
+        })
+      );
 
-      console.log(res.data);
+      alert(res.message);
 
       navigate("/dashboard");
+
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert("Invalid Email or Password");
     }
   };
@@ -50,73 +57,54 @@ function Login() {
         }}
       >
         <div className="text-center">
-
           <h1>🌞🌬️</h1>
-
-          <h2 className="fw-bold">
-            Welcome Back
-          </h2>
-
+          <h2 className="fw-bold">Welcome Back</h2>
           <p className="text-muted">
             Solar Wind Deployment Intelligence Platform
           </p>
-
         </div>
 
-        <form onSubmit={loginUser}>
-
+        <form onSubmit={handleLogin}>
           <div className="mb-3">
-
-            <label className="form-label">
-              Email Address
-            </label>
+            <label className="form-label">Email Address</label>
 
             <input
               type="email"
               name="email"
               className="form-control"
               placeholder="Enter your email"
+              value={user.email}
               onChange={handleChange}
               required
             />
-
           </div>
 
           <div className="mb-3">
-
-            <label className="form-label">
-              Password
-            </label>
+            <label className="form-label">Password</label>
 
             <input
               type="password"
               name="password"
               className="form-control"
               placeholder="Enter your password"
+              value={user.password}
               onChange={handleChange}
               required
             />
-
           </div>
 
           <div className="d-grid">
-
             <button
               type="submit"
               className="btn btn-success btn-lg"
             >
               Login
             </button>
-
           </div>
-
         </form>
 
         <div className="text-center mt-4">
-
-          <p>
-            Don't have an account?
-          </p>
+          <p>Don't have an account?</p>
 
           <Link
             to="/register"
@@ -124,9 +112,7 @@ function Login() {
           >
             Create Account
           </Link>
-
         </div>
-
       </div>
     </div>
   );

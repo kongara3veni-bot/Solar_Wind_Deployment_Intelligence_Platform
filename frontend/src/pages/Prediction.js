@@ -1,5 +1,5 @@
 import { useState } from "react";
-import API from "../api/api";
+import { predictEnergy } from "../api/api";
 
 function Prediction() {
   const [formData, setFormData] = useState({
@@ -9,7 +9,8 @@ function Prediction() {
     rainfall: "",
   });
 
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -18,41 +19,42 @@ function Prediction() {
     });
   };
 
-  const predictEnergy = async (e) => {
+  const handlePrediction = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await API.get("/prediction/prediction/", {
-        params: formData,
-      });
+    setLoading(true);
 
-      setResult(res.data.prediction);
+    try {
+      const res = await predictEnergy(formData);
+      setResult(res.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       alert("Prediction Failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="container mt-5">
 
-      {/* Header */}
       <div className="text-center mb-5">
         <h1 className="text-success fw-bold">
           🌞 Renewable Energy Prediction 🌬️
         </h1>
 
         <p className="lead">
-          Enter the climate conditions to predict the most suitable renewable energy source.
+          Enter climate conditions to predict the best renewable energy source.
         </p>
       </div>
 
       <div className="row">
 
         {/* Left Side */}
-        <div className="col-md-7">
 
-          <div className="card shadow-lg">
+        <div className="col-md-6">
+
+          <div className="card shadow">
 
             <div className="card-header bg-success text-white">
               <h4>Climate Parameters</h4>
@@ -60,12 +62,10 @@ function Prediction() {
 
             <div className="card-body">
 
-              <form onSubmit={predictEnergy}>
+              <form onSubmit={handlePrediction}>
 
                 <div className="mb-3">
-                  <label className="form-label">
-                    🌡 Temperature (°C)
-                  </label>
+                  <label>Temperature (°C)</label>
 
                   <input
                     type="number"
@@ -78,9 +78,7 @@ function Prediction() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">
-                    💨 Wind Speed (km/h)
-                  </label>
+                  <label>Wind Speed (km/h)</label>
 
                   <input
                     type="number"
@@ -93,9 +91,7 @@ function Prediction() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">
-                    💧 Humidity (%)
-                  </label>
+                  <label>Humidity (%)</label>
 
                   <input
                     type="number"
@@ -107,10 +103,8 @@ function Prediction() {
                   />
                 </div>
 
-                <div className="mb-3">
-                  <label className="form-label">
-                    🌧 Rainfall (mm)
-                  </label>
+                <div className="mb-4">
+                  <label>Rainfall (mm)</label>
 
                   <input
                     type="number"
@@ -122,11 +116,12 @@ function Prediction() {
                   />
                 </div>
 
-                <div className="d-grid">
-                  <button className="btn btn-success btn-lg">
-                    Predict Energy Source
-                  </button>
-                </div>
+                <button
+                  className="btn btn-success w-100"
+                  disabled={loading}
+                >
+                  {loading ? "Predicting..." : "Predict Energy Source"}
+                </button>
 
               </form>
 
@@ -137,87 +132,127 @@ function Prediction() {
         </div>
 
         {/* Right Side */}
-        <div className="col-md-5">
 
-          <div className="card shadow-lg">
+        <div className="col-md-6">
+
+          <div className="card shadow">
 
             <div className="card-header bg-primary text-white">
               <h4>Prediction Result</h4>
             </div>
 
-            <div className="card-body text-center">
+            <div className="card-body">
 
               {result ? (
+
                 <>
-                  <h1 style={{ fontSize: "60px" }}>
-                    {result === "Solar" ? "🌞" : "🌬️"}
-                  </h1>
 
-                  <h2 className="mt-3">
+                  <h2 className="text-center">
 
-                    {result === "Solar" ? (
-                      <span className="badge bg-warning text-dark">
-                        Solar Energy
-                      </span>
-                    ) : (
-                      <span className="badge bg-primary">
-                        Wind Energy
-                      </span>
-                    )}
+                    {result.prediction === "Solar" ? "🌞 Solar Energy" : "🌬️ Wind Energy"}
 
                   </h2>
 
-                  <p className="mt-4">
+                  <hr />
 
-                    {result === "Solar"
-                      ? "High solar potential detected based on the entered climate conditions."
-                      : "High wind energy potential detected based on the entered climate conditions."}
+                  <table className="table table-bordered">
 
-                  </p>
+                    <tbody>
+
+                      <tr>
+                        <th>Confidence</th>
+                        <td>{result.confidence}%</td>
+                      </tr>
+
+                      <tr>
+                        <th>Solar Score</th>
+                        <td>{result.solar_score}</td>
+                      </tr>
+
+                      <tr>
+                        <th>Wind Score</th>
+                        <td>{result.wind_score}</td>
+                      </tr>
+
+                      <tr>
+                        <th>CO₂ Saved</th>
+                        <td>{result.co2_saved}</td>
+                      </tr>
+
+                      <tr>
+                        <th>Annual Output</th>
+                        <td>{result.annual_output}</td>
+                      </tr>
+
+                      <tr>
+                        <th>Tilt Angle</th>
+                        <td>{result.tilt_angle}</td>
+                      </tr>
+
+                      <tr>
+                        <th>Panel Type</th>
+                        <td>{result.panel_type}</td>
+                      </tr>
+
+                      <tr>
+                        <th>Installation Cost</th>
+                        <td>{result.installation_cost}</td>
+                      </tr>
+
+                      <tr>
+                        <th>Payback Period</th>
+                        <td>{result.payback_period}</td>
+                      </tr>
+
+                    </tbody>
+
+                  </table>
+
+                  <div className="alert alert-success">
+
+                    <strong>Recommendation:</strong>
+
+                    <br />
+
+                    {result.recommendation}
+
+                  </div>
+
+                  <div className="card">
+
+                    <div className="card-header">
+                      Reasons
+                    </div>
+
+                    <div className="card-body">
+
+                      <ul>
+
+                        {result.reason.map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+
+                      </ul>
+
+                    </div>
+
+                  </div>
+
                 </>
+
               ) : (
-                <>
+
+                <div className="text-center">
+
                   <h1>🤖</h1>
 
-                  <p className="text-muted">
-                    Enter climate values and click
-                    <strong> Predict Energy Source </strong>
-                    to view the AI recommendation.
+                  <p>
+                    Enter climate values and click Predict.
                   </p>
-                </>
+
+                </div>
+
               )}
-
-            </div>
-
-          </div>
-
-          <div className="card mt-4 shadow">
-
-            <div className="card-header bg-dark text-white">
-              AI Model Information
-            </div>
-
-            <div className="card-body">
-
-              <ul className="list-group">
-
-                <li className="list-group-item">
-                  🤖 Model : Random Forest Classifier
-                </li>
-
-                <li className="list-group-item">
-                  📊 Machine Learning : Supervised Learning
-                </li>
-
-                <li className="list-group-item">
-                  ⚡ Prediction : Solar / Wind
-                </li>
-
-                <li className="list-group-item">
-                  📈 Accuracy : 97%
-                </li>
-
-              </ul>
 
             </div>
 

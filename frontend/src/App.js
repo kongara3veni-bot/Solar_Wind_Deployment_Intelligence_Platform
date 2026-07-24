@@ -1,6 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -10,31 +16,114 @@ import Projects from "./pages/Projects";
 import UploadDataset from "./pages/UploadDataset";
 import Prediction from "./pages/Prediction";
 import History from "./pages/History";
-import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
-import DatasetManagement from "./pages/DatasetManagement";
+import Profile from "./pages/Profile";
+import DatasetManager from "./pages/DatasetManager";
+
+function Layout() {
+  const location = useLocation();
+
+  const hideNavbar =
+    location.pathname === "/login" ||
+    location.pathname === "/register";
+
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
+
+      <Routes>
+
+        {/* Public Routes */}
+
+        <Route path="/" element={<Home />} />
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Routes */}
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoute>
+              <UploadDataset />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dataset"
+          element={
+            <ProtectedRoute>
+              <DatasetManager />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/prediction"
+          element={
+            <ProtectedRoute>
+              <Prediction />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+    </>
+  );
+}
 
 function App() {
   return (
     <Router>
-      <Navbar />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/upload" element={<UploadDataset />} />
-        <Route path="/prediction" element={<Prediction />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route
-          path="/dataset-management"
-          element={<DatasetManagement />}
-        />
-      </Routes>
+      <Layout />
     </Router>
   );
 }
